@@ -7,20 +7,7 @@
     <meta name="description" content="orekh坚果的官方作品集，一位在数字画布上，寻找东方意境与赛博朋克交汇点的二次元插画师。">
     <meta name="keywords" content="orekh, 坚果, 二次元, 插画, 艺术家, 原创角色, 游戏原画">
     
-    <script src="https://cdn.tailwindcss.com">
-// ---- External image sanitizer (postimg et al.) ----
-function safeImageSrc(url) {
-  if (!url) return '';
-  url = String(url).trim().replace(/^http:\/\//i, 'https://');
-  // local paths or any https absolute URL (postimg) are returned as-is
-  return url;
-} catch {
-    return url;
-  }
-}
-
-console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bold');
-</script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -121,7 +108,7 @@ console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bol
         <section id="about" class="py-20">
             <div class="flex flex-col md:flex-row items-center gap-12">
                 <div class="md:w-1/3">
-                    <img referrerpolicy="no-referrer" src="https://placehold.co/500x500/f9fafb/1f2937?text=orekh" alt="orekh坚果 头像" class="rounded-full shadow-2xl mx-auto" onerror="this.onerror=null; this.src='https://placehold.co/800x1067?text=Image+Error';">
+                    <img src="https://placehold.co/500x500/f9fafb/1f2937?text=orekh" alt="orekh坚果 头像" class="rounded-full shadow-2xl mx-auto">
                 </div>
                 <div class="md:w-2/3">
                     <h2 class="text-4xl font-bold mb-4 title-font" data-lang="about_title">关于我</h2>
@@ -165,7 +152,7 @@ console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bol
     <div id="artwork-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 hidden opacity-0" onclick="closeArtworkModal()">
         <div id="artwork-modal-content" class="bg-white rounded-lg shadow-2xl max-w-4xl w-11/12 max-h-[90vh] flex flex-col md:flex-row transform scale-95" onclick="event.stopPropagation()">
             <div class="md:w-1/2 h-64 md:h-auto">
-                <img referrerpolicy="no-referrer" id="modal-img" src="" alt="作品详情" class="w-full h-full object-cover md:rounded-l-lg" onerror="this.onerror=null; this.src='https://placehold.co/800x1067?text=Image+Error';">
+                <img id="modal-img" src="" alt="作品详情" class="w-full h-full object-cover md:rounded-l-lg">
             </div>
             <div class="md:w-1/2 p-8 overflow-y-auto">
                 <h3 id="modal-title" class="text-3xl font-bold mb-4 title-font"></h3>
@@ -180,7 +167,7 @@ console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bol
 
     <script>
         // --- ★★★ 您的专属配置信息 ★★★ ---
-        const GOOGLE_SHEET_URL = 'data/works.csv?v=1756298924';
+        const GOOGLE_SHEET_URL = '/data/works.csv?v=1756300112';
         const PROXY_URL = '';
 
         // --- 语言翻译数据 ---
@@ -205,9 +192,10 @@ console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bol
             const r18Container = document.getElementById('gallery-r18');
             try {
                 if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes('【')) throw new Error('Google Sheet URL is not configured.');
-                const response = await fetch(`${PROXY_URL}${encodeURIComponent(GOOGLE_SHEET_URL)}`);
-                if (!response.ok) throw new Error(`获取 CSV 失败：HTTP ${response.status}，url=${response.url}`);
+                const response = await fetch(GOOGLE_SHEET_URL, { method: 'GET', cache: 'no-store', redirect: 'follow' })}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.url}`);
                 const csvText = await response.text();
+        console.log('[CSV] Loaded:', response.url, csvText.slice(0, 80));
                 
                 artworksData = parseCSV(csvText).reverse(); 
                 sfwItems = artworksData.filter(item => item.category === 'SFW');
@@ -269,7 +257,7 @@ console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bol
                 const isR18 = item.category === 'R-18';
                 div.className = `bg-white rounded-lg overflow-hidden group shadow-md card-hover cursor-pointer ${isR18 ? 'restricted-item' : ''}`;
                 div.onclick = () => isR18 ? showAgeGate(div, originalIndex) : showArtworkModal(originalIndex);
-                div.innerHTML = `<img referrerpolicy="no-referrer" src="${safeImageSrc(item.imageUrl)}" alt="${item.title_zh}" class="w-full h-auto object-cover aspect-[3/4]" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/800x1067?text=Image+Error';">${isR18 ? `<div class="absolute inset-0 flex items-end justify-center p-6 overlay"><p class="text-white text-xl font-bold text-center" data-lang="portfolio_r18_prompt">点击查看<br>(需年满18周岁)</p></div>` : ''}`;
+                div.innerHTML = `<img src="${item.imageUrl}" alt="${item.title_zh}" class="w-full h-auto object-cover aspect-[3/4]" loading="lazy">${isR18 ? `<div class="absolute inset-0 flex items-end justify-center p-6 overlay"><p class="text-white text-xl font-bold text-center" data-lang="portfolio_r18_prompt">点击查看<br>(需年满18周岁)</p></div>` : ''}`;
                 fragment.appendChild(div);
             });
             container.appendChild(fragment);
@@ -326,7 +314,7 @@ console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bol
         function showArtworkModal(index) {
             const item = artworksData[index];
             if (!item) return;
-            document.getElementById('modal-img').src = safeImageSrc(item.imageUrl);
+            document.getElementById('modal-img').src = item.imageUrl;
             const langKey = document.documentElement.lang === 'en' ? 'en' : 'zh';
             document.getElementById('modal-title').textContent = item[`title_${langKey}`];
             document.getElementById('modal-desc').textContent = item[`description_${langKey}`];
