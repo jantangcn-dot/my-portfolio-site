@@ -184,7 +184,7 @@ function safeImageSrc(url) {
 
     <script>
         // --- ★★★ 您的专属配置信息 ★★★ ---
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsxhQ_OL-l6z20i7WvLLPA6KEvShwp0hYQgd9npN0mU0LxDYkr6oY6Xvv32Ez0F6-M8bYEr0BfGxyx/pub?gid=0&single=true&output=csv';
+        const GOOGLE_SHEET_URL = './data/works.csv?v=1756298189';
         const PROXY_URL = 'https://little-rice-6cc7.jantangcn.workers.dev?url=';
 
         // --- 语言翻译数据 ---
@@ -210,7 +210,7 @@ function safeImageSrc(url) {
             try {
                 if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes('【')) throw new Error('Google Sheet URL is not configured.');
                 const response = await fetch(`${PROXY_URL}${encodeURIComponent(GOOGLE_SHEET_URL)}`);
-                if (!response.ok) throw new Error(`Network response for artworks was not ok. Status: ${response.status}`);
+                if (!response.ok) throw new Error(`获取 CSV 失败：HTTP ${response.status}，url=${response.url}`);
                 const csvText = await response.text();
                 
                 artworksData = parseCSV(csvText).reverse(); 
