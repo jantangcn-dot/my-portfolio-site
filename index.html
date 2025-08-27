@@ -7,7 +7,24 @@
     <meta name="description" content="orekh坚果的官方作品集，一位在数字画布上，寻找东方意境与赛博朋克交汇点的二次元插画师。">
     <meta name="keywords" content="orekh, 坚果, 二次元, 插画, 艺术家, 原创角色, 游戏原画">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+// ---- External image sanitizer (postimg et al.) ----
+function safeImageSrc(url) {
+  if (!url) return '';
+  url = String(url).trim().replace(/^http:\/\//i, 'https://'); // force https
+  // leave local assets (e.g., /images/...) untouched
+  if (url.startsWith('/')) return url;
+  try {
+    const u = new URL(url);
+    // images.weserv.nl expects host+path(+search) without protocol
+    const hostAndPath = u.host + u.pathname + (u.search || '');
+    return 'https://images.weserv.nl/?url=' + encodeURIComponent(hostAndPath);
+  } catch {
+    return url;
+  }
+}
+
+</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -108,7 +125,7 @@
         <section id="about" class="py-20">
             <div class="flex flex-col md:flex-row items-center gap-12">
                 <div class="md:w-1/3">
-                    <img referrerpolicy="no-referrer" src="https://placehold.co/500x500/f9fafb/1f2937?text=orekh" alt="orekh坚果 头像" class="rounded-full shadow-2xl mx-auto">
+                    <img referrerpolicy="no-referrer" src="https://placehold.co/500x500/f9fafb/1f2937?text=orekh" alt="orekh坚果 头像" class="rounded-full shadow-2xl mx-auto" onerror="this.onerror=null; this.src='https://placehold.co/800x1067?text=Image+Error';">
                 </div>
                 <div class="md:w-2/3">
                     <h2 class="text-4xl font-bold mb-4 title-font" data-lang="about_title">关于我</h2>
@@ -152,7 +169,7 @@
     <div id="artwork-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 hidden opacity-0" onclick="closeArtworkModal()">
         <div id="artwork-modal-content" class="bg-white rounded-lg shadow-2xl max-w-4xl w-11/12 max-h-[90vh] flex flex-col md:flex-row transform scale-95" onclick="event.stopPropagation()">
             <div class="md:w-1/2 h-64 md:h-auto">
-                <img referrerpolicy="no-referrer" id="modal-img" src="" alt="作品详情" class="w-full h-full object-cover md:rounded-l-lg">
+                <img referrerpolicy="no-referrer" id="modal-img" src="" alt="作品详情" class="w-full h-full object-cover md:rounded-l-lg" onerror="this.onerror=null; this.src='https://placehold.co/800x1067?text=Image+Error';">
             </div>
             <div class="md:w-1/2 p-8 overflow-y-auto">
                 <h3 id="modal-title" class="text-3xl font-bold mb-4 title-font"></h3>
@@ -167,8 +184,8 @@
 
     <script>
         // --- ★★★ 您的专属配置信息 ★★★ ---
-        const GOOGLE_SHEET_URL = '/data/works.csv';
-        const PROXY_URL = '';
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsxhQ_OL-l6z20i7WvLLPA6KEvShwp0hYQgd9npN0mU0LxDYkr6oY6Xvv32Ez0F6-M8bYEr0BfGxyx/pub?gid=0&single=true&output=csv';
+        const PROXY_URL = 'https://little-rice-6cc7.jantangcn.workers.dev?url=';
 
         // --- 语言翻译数据 ---
         const translations = {
@@ -187,34 +204,12 @@
             setLanguage('zh-CN');
         });
         
-        
-async function fetchArtworks() {
-    const sfwContainer = document.getElementById('gallery-sfw');
-    const r18Container = document.getElementById('gallery-r18');
-    try {
-        const response = await fetch(GOOGLE_SHEET_URL, { method: 'GET' });
-        if (!response.ok) throw new Error(`Network response for artworks was not ok. Status: ${response.status}`);
-        const csvText = await response.text();
-
-        artworksData = parseCSV(csvText).reverse();
-        sfwItems = artworksData.filter(item => String(item.category || '').toUpperCase() !== 'R-18');
-        r18Items = artworksData.filter(item => String(item.category || '').toUpperCase() === 'R-18');
-
-        // 动态设置顶部横幅背景：优先使用第一条 SFW 图片
-        const hero = document.querySelector('.hero-bg');
-        const heroImg = (sfwItems[0] && sfwItems[0].imageUrl) ? sfwItems[0].imageUrl : (artworksData[0] ? artworksData[0].imageUrl : '');
-        if (hero && heroImg) hero.style.backgroundImage = `url('${heroImg}')`;
-
-        renderInitialGalleries();
-    } catch (error) {
-        console.error('获取作品失败:', error);
-        const errorMsg = `<p class="text-center text-red-500 col-span-full" data-lang="error_loading">作品加载失败，请检查 /data/works.csv 是否存在。</p>`;
-        sfwContainer.innerHTML = errorMsg;
-        r18Container.innerHTML = errorMsg;
-        setLanguage(document.documentElement.lang);
-    }
-}
-${encodeURIComponent(GOOGLE_SHEET_URL)}`);
+        async function fetchArtworks() {
+            const sfwContainer = document.getElementById('gallery-sfw');
+            const r18Container = document.getElementById('gallery-r18');
+            try {
+                if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes('【')) throw new Error('Google Sheet URL is not configured.');
+                const response = await fetch(`${PROXY_URL}${encodeURIComponent(GOOGLE_SHEET_URL)}`);
                 if (!response.ok) throw new Error(`Network response for artworks was not ok. Status: ${response.status}`);
                 const csvText = await response.text();
                 
@@ -278,7 +273,7 @@ ${encodeURIComponent(GOOGLE_SHEET_URL)}`);
                 const isR18 = item.category === 'R-18';
                 div.className = `bg-white rounded-lg overflow-hidden group shadow-md card-hover cursor-pointer ${isR18 ? 'restricted-item' : ''}`;
                 div.onclick = () => isR18 ? showAgeGate(div, originalIndex) : showArtworkModal(originalIndex);
-                div.innerHTML = `<img referrerpolicy="no-referrer" src="${item.imageUrl}" alt="${item.title_zh}" class="w-full h-auto object-cover aspect-[3/4]" loading="lazy">${isR18 ? `<div class="absolute inset-0 flex items-end justify-center p-6 overlay"><p class="text-white text-xl font-bold text-center" data-lang="portfolio_r18_prompt">点击查看<br>(需年满18周岁)</p></div>` : ''}`;
+                div.innerHTML = `<img referrerpolicy="no-referrer" src="${safeImageSrc(item.imageUrl)}" alt="${item.title_zh}" class="w-full h-auto object-cover aspect-[3/4]" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/800x1067?text=Image+Error';">${isR18 ? `<div class="absolute inset-0 flex items-end justify-center p-6 overlay"><p class="text-white text-xl font-bold text-center" data-lang="portfolio_r18_prompt">点击查看<br>(需年满18周岁)</p></div>` : ''}`;
                 fragment.appendChild(div);
             });
             container.appendChild(fragment);
@@ -335,7 +330,7 @@ ${encodeURIComponent(GOOGLE_SHEET_URL)}`);
         function showArtworkModal(index) {
             const item = artworksData[index];
             if (!item) return;
-            document.getElementById('modal-img').src = item.imageUrl;
+            document.getElementById('modal-img').src = safeImageSrc(item.imageUrl);
             const langKey = document.documentElement.lang === 'en' ? 'en' : 'zh';
             document.getElementById('modal-title').textContent = item[`title_${langKey}`];
             document.getElementById('modal-desc').textContent = item[`description_${langKey}`];
