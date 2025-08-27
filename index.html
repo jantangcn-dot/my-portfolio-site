@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>作品集</title>
+</head>
+<body>
+  <h1>作品集演示</h1>
+  <div id="gallery-sfw"></div>
+  <div id="gallery-r18"></div>
+
+<script>
+let artworksData = [];
+let sfwItems = [], r18Items = [];
+const GOOGLE_SHEET_URL = '/data/works.csv';
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const values = line.split(',');
+    let obj = {};
+    headers.forEach((h, i) => obj[h] = values[i]);
+    return obj;
+  });
+}
+
+async function fetchArtworks() {
+  const sfwContainer = document.getElementById('gallery-sfw');
+  const r18Container = document.getElementById('gallery-r18');
+  try {
+    const res = await fetch(GOOGLE_SHEET_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csvText = await res.text();
+    artworksData = parseCSV(csvText).reverse();
+    sfwItems = artworksData.filter(i => (String(i.category || '').toUpperCase() !== 'R-18'));
+    r18Items = artworksData.filter(i => (String(i.category || '').toUpperCase() === 'R-18'));
+    sfwContainer.innerHTML = '<pre>' + JSON.stringify(sfwItems, null, 2) + '</pre>';
+    r18Container.innerHTML = '<pre>' + JSON.stringify(r18Items, null, 2) + '</pre>';
+  } catch (err) {
+    sfwContainer.innerHTML = '加载作品失败: ' + err;
+    r18Container.innerHTML = '';
+  }
+}
+
+fetchArtworks();
+</script>
+</body>
+</html>
