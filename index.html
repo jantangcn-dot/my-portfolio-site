@@ -11,19 +11,15 @@
 // ---- External image sanitizer (postimg et al.) ----
 function safeImageSrc(url) {
   if (!url) return '';
-  url = String(url).trim().replace(/^http:\/\//i, 'https://'); // force https
-  // leave local assets (e.g., /images/...) untouched
-  if (url.startsWith('/')) return url;
-  try {
-    const u = new URL(url);
-    // images.weserv.nl expects host+path(+search) without protocol
-    const hostAndPath = u.host + u.pathname + (u.search || '');
-    return 'https://images.weserv.nl/?url=' + encodeURIComponent(hostAndPath);
-  } catch {
+  url = String(url).trim().replace(/^http:\/\//i, 'https://');
+  // local paths or any https absolute URL (postimg) are returned as-is
+  return url;
+} catch {
     return url;
   }
 }
 
+console.log('%c[BUILD] clean-no-proxy 1756299120','color:#16a34a;font-weight:bold');
 </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,8 +180,8 @@ function safeImageSrc(url) {
 
     <script>
         // --- ★★★ 您的专属配置信息 ★★★ ---
-        const GOOGLE_SHEET_URL = './data/works.csv?v=1756298189';
-        const PROXY_URL = 'https://little-rice-6cc7.jantangcn.workers.dev?url=';
+        const GOOGLE_SHEET_URL = 'data/works.csv?v=1756298924';
+        const PROXY_URL = '';
 
         // --- 语言翻译数据 ---
         const translations = {
